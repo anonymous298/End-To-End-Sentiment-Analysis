@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyze Sentiment - Sentiment Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1c1f 0%, #2d3436 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding-bottom: 100px; /* Add padding for footer */
+            position: relative;
+        }
+        .navbar {
+            background: rgba(33, 37, 41, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .analysis-card {
+            background: rgba(33, 37, 41, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 100px;
+            margin-bottom: 40px; /* Add margin bottom */
+            border: 1px solid rgba(108, 92, 231, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid #2d3436;
+            background-color: #1a1c1f;
+            color: #e0e0e0;
+            font-size: 1.1rem;
+        }
+        .form-control:focus {
+            background-color: #1a1c1f;
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+            color: #e0e0e0;
+        }
+        .form-control::placeholder {
+            color: #6c757d;
+        }
+        .btn-analyze {
+            background-color: #6c5ce7;
+            color: white;
+            padding: 12px 40px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+        .btn-analyze:hover {
+            background-color: #5b4bc4;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+            color: white;
+        }
+        .result-box {
+            background: rgba(26, 28, 31, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(108, 92, 231, 0.2);
+        }
+        .sentiment-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+        }
+        .sentiment-icon i {
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+            background: rgba(33, 37, 41, 0.95);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        .footer span {
+            color: #6c5ce7;
+            font-weight: 500;
+        }
+        .positive-text {
+            color: #00ff95;
+        }
+        .negative-text {
+            color: #ff4d4d;
+        }
+        .neutral-text {
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Sentiment Analysis</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/predict">Try It Now</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="analysis-card">
+                    <h2 class="text-center mb-4">Analyze Sentiment</h2>
+                    <form action="/predict" method="POST" id="sentimentForm">
+                        <div class="mb-4">
+                            <label for="text" class="form-label">Enter your text:</label>
+                            <textarea 
+                                class="form-control" 
+                                id="text" 
+                                name="text" 
+                                rows="5" 
+                                placeholder="Type or paste your text here to analyze its sentiment..."
+                                required>{% if input_text %}{{ input_text }}{% endif %}</textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-analyze">
+                                <i class="bi bi-search me-2"></i>Analyze Sentiment
+                            </button>
+                        </div>
+                    </form>
+
+                    {% if error %}
+                    <div class="alert alert-danger mt-4" role="alert">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+                    {% if prediction %}
+                    <div class="result-box">
+                        <div class="text-center">
+                            <div class="sentiment-icon">
+                                {% if prediction == 'positive' %}
+                                    <i class="bi bi-emoji-laughing-fill text-success"></i>
+                                {% elif prediction == 'negative' %}
+                                    <i class="bi bi-emoji-frown-fill text-danger"></i>
+                                {% else %}
+                                    <i class="bi bi-emoji-neutral-fill text-warning"></i>
+                                {% endif %}
+                            </div>
+                            <h4 class="mb-3">Sentiment Result</h4>
+                            <p class="lead" id="sentimentResult">
+                                {% if prediction == 'positive' %}
+                                    <span class="positive-text">Positive</span>
+                                {% elif prediction == 'negative' %}
+                                    <span class="negative-text">Negative</span>
+                                {% else %}
+                                    <span class="neutral-text">Neutral</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Made with ❤️ by <span>Talha</span> © 2024</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+numpy
+pandas
+nltk
+tensorflow
+keras
+scikit-learn
+dill
+flask
+# -e .
